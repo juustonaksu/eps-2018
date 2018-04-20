@@ -2,7 +2,7 @@
 
 MeStepperOnBoard stepper(SLOT_2);
 MeStepperOnBoard stepper2(SLOT_1);
-
+MeStepperOnBoard stepper3(SLOT_3);
 int analogvalue;
 String a = "";
 boolean buttonActive = false;
@@ -23,6 +23,10 @@ void setup() {
   stepper2.setAcceleration(2000);
   stepper2.setMicroStep(1);
   stepper2.enableOutputs();
+  stepper3.setMaxSpeed(1000);
+  stepper3.setAcceleration(2000);
+  stepper3.setMicroStep(1);
+  stepper3.enableOutputs();
   pinMode(30, INPUT_PULLUP);
   pinMode(28, OUTPUT);
   pinMode(27, OUTPUT);
@@ -53,8 +57,10 @@ void loop() {
     if (cel < 24) {
       stepper.move(moveamount);
       //stepper2.move(moveamount);
+      //stepper3.move(moveamount);
       stepper.run();
       //stepper2.run();
+      //stepper3.run();
     }
     if (buttonActive == false) {
       buttonActive = true;
