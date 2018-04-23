@@ -16,7 +16,8 @@ int m2 = 1;
 NewPing sonar(PING_PIN, PING_PIN, MAX_DISTANCE);
 boolean fullbatteryiswaiting = false;
 long motorTimer = 0;
-uint8_t motorSpeed = 200;
+// minus= away from motorshaft + towards motorshaft
+uint8_t motorSpeed = 255;
 
 void setup() {
   // put your setup code here, to run once:
@@ -37,87 +38,95 @@ void setup() {
   steppery.setMicroStep(1);
   steppery.enableOutputs();
   //Y
-  pinMode(30, INPUT_PULLUP);
+  pinMode(A8, INPUT_PULLUP);
   //X
-  pinMode(29, INPUT_PULLUP);
+  pinMode(A9, INPUT_PULLUP);
   //Z
-  pinMode(25, INPUT_PULLUP);
-  pinMode(28, OUTPUT);
-  pinMode(27, OUTPUT);
-  pinMode(26, OUTPUT);
+  pinMode(A10, INPUT_PULLUP);
+  //Yellow
+  pinMode(A12, OUTPUT);
+  //Green
+  pinMode(A13, OUTPUT);
+  //Red
+  pinMode(A11, OUTPUT);
+  //Blue
+  pinMode(A14, OUTPUT);
+  digitalWrite(A11, HIGH);
+  digitalWrite(A12, HIGH);
+  digitalWrite(A13, HIGH);
+  digitalWrite(A14, HIGH);
+  delay(500);
+  digitalWrite(A11, LOW);
+  digitalWrite(A12, LOW);
+  digitalWrite(A13, LOW);
+  digitalWrite(A14, LOW);
   initializeMotors();
 }
 
 void initializeMotors() {
+  dcmotorleft.run(-motorSpeed);
+  dcmotorright.run(-motorSpeed);
+  delay(200);
   dcmotorleft.run(motorSpeed); /* value: between -255 and 255. */
   dcmotorright.run(motorSpeed); /* value: between -255 and 255. */
-  delay(2000);
+  delay(10000);
   dcmotorleft.stop();
   dcmotorright.stop();
   delay(100);
-  dcmotorleft.run(-motorSpeed);
-  dcmotorright.run(-motorSpeed);
-  delay(2000);
   dcmotorleft.stop();
   dcmotorright.stop();
   stepperx.move(-10000);
   stepperz.move(-10000);
   steppery.move(-10000);
 
-  while (digitalRead(29) == HIGH) {
+  while (digitalRead(A9) == HIGH) {
     stepperx.run();
   }
   stepperx.setCurrentPosition(0);
-  while (digitalRead(30) == HIGH) {
+  while (digitalRead(A8) == HIGH) {
     steppery.run();
   }
   steppery.setCurrentPosition(0);
-  while (digitalRead(25) == HIGH) {
+  while (digitalRead(A10) == HIGH) {
     stepperz.run();
   }
   stepperz.setCurrentPosition(0);
 }
 
 void changeBattery() {
+    digitalWrite(A11, HIGH);
+  digitalWrite(A12, LOW);
+  digitalWrite(A13, LOW);
+  digitalWrite(A14, LOW);
   Serial.write("Change");
   steppery.moveTo(500);
   while (stepperx.currentPosition() != 500) {
     steppery.run();
   }
-  int dctime = 25000;
-  motorTimer = millis();
-  //while (millis() - motorTimer < dctime) {
-  dcmotorleft.run(motorSpeed);
-  //}
-  delay(2000);
+  dcmotorleft.run(-motorSpeed);
+  delay(10000);
   dcmotorleft.stop();
   stepperx.moveTo(2500);
   while (stepperx.currentPosition() != 2500) {
     stepperx.run();
   }
-  motorTimer = millis();
-  while (millis() - motorTimer < dctime) {
-    dcmotorleft.run(-motorSpeed);
-  }
+  dcmotorleft.run(motorSpeed);
+  delay(10000);
   dcmotorleft.stop();
   //empty battery is out
   stepperx.moveTo(3500);
   while (stepperx.currentPosition() != 3500) {
     stepperx.run();
   }
-  motorTimer = millis();
-  while (millis() - motorTimer < dctime) {
-    dcmotorright.run(motorSpeed);
-  }
+  dcmotorright.run(-motorSpeed);
+  delay(10000);
   dcmotorright.stop();
   stepperx.moveTo(0);
   while (stepperx.currentPosition() != 0) {
     stepperx.run();
   }
-  motorTimer = millis();
-  while (millis() - motorTimer < dctime) {
-    dcmotorright.run(-motorSpeed);
-  }
+  dcmotorright.run(motorSpeed);
+  delay(10000);
   dcmotorright.stop();
   //full battery is in the drone, system ready to go on
   batteryScan();
@@ -125,7 +134,7 @@ void changeBattery() {
 
 void batteryScan() {
   stepperz.moveTo(2000);
-  while (stepperx.currentPosition() != 2000) {
+  while (stepperz.currentPosition() != 2000) {
     stepperz.run();
   }
   if (Serial.available()) {
@@ -150,13 +159,15 @@ void moveMotors(int z, int x) {
   if (cel < 25) {
     stepperz.moveTo(z);
     stepperx.moveTo(x);
-    digitalWrite(26, LOW);
-    digitalWrite(27, HIGH);
-    digitalWrite(28, LOW);
+    digitalWrite(A11, LOW);
+    digitalWrite(A12, LOW);
+    digitalWrite(A13, HIGH);
+    digitalWrite(A14, LOW);
   } else {
-    digitalWrite(26, HIGH);
-    digitalWrite(27, LOW);
-    digitalWrite(28, LOW);
+    digitalWrite(A11, HIGH);
+    digitalWrite(A12, LOW);
+    digitalWrite(A13, LOW);
+    digitalWrite(A14, LOW);
   }
   while ((stepperz.currentPosition() != z) && (stepperx.currentPosition() != x)) {
     stepperz.run();
@@ -164,6 +175,10 @@ void moveMotors(int z, int x) {
   }
 }
 void takeFullBattery() {
+  digitalWrite(A11, LOW);
+  digitalWrite(A12, HIGH);
+  digitalWrite(A13, LOW);
+  digitalWrite(A14, LOW);
   Serial.write("Gimme coords");
   if (Serial.available()) {
     for (int i = 0; i < 2; i++) {
@@ -190,9 +205,10 @@ void loop() {
   if (fullbatteryiswaiting != true) {
     takeFullBattery();
   }
-  digitalWrite(26, LOW);
-  digitalWrite(27, LOW);
-  digitalWrite(28, HIGH);
+  digitalWrite(A11, LOW);
+  digitalWrite(A12, LOW);
+  digitalWrite(A13, LOW);
+  digitalWrite(A14, HIGH);
   /*stepperx.run();
     steppery.run();
     stepperz.run();*/
