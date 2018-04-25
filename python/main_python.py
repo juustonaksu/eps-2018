@@ -9,8 +9,8 @@ import time
 GPIO.setmode(GPIO.BOARD)
  
 # set up the GPIO channels - one input and one output
-ser=""
-dev=""
+ser=0
+dev=0
 GPIO.setup(13, GPIO.IN)
 
 def mapBattery(batno):
