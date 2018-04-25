@@ -9,7 +9,7 @@ import time
 GPIO.setmode(GPIO.BOARD)
  
 # set up the GPIO channels - one input and one output
-GPIO.setup(7, GPIO.IN)
+GPIO.setup(13, GPIO.IN)
 
 def mapBattery(batno):
     dict = {'1': "500&-200&", '2': "-300&600&",
@@ -55,13 +55,14 @@ def readCode():
 def fullBattery():
     oncounter = 0
     while oncounter <10:
-        input_value = GPIO.input(7)
+        input_value = GPIO.input(13)
         if(input_value and oncounter > 8):
             #Battery fully charged
             print("Battery full")
             oncounter=oncounter+1
-            mapBattery(1)
+            mapBattery("1")
             readCode()
+            break
         elif(input_value):
             #Empty slot or battery over 75%
             oncounter= oncounter+1	
@@ -71,7 +72,7 @@ def fullBattery():
         time.sleep(0.1)
 def readSerial():
     req = ser.readline()
-    if(req="Full"):
+    if(req=="Full"):
         fullBattery()
 def initall():
     devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
