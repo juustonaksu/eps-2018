@@ -10,7 +10,8 @@ GPIO.setmode(GPIO.BOARD)
  
 # set up the GPIO channels - one input and one output
 GPIO.setup(7, GPIO.IN)
-
+ser=""
+dev=""
 def mapBattery(batno):
     dict = {'1': "500&-200&", '2': "-300&600&",
             '3': "-500&500&", '4': "1000&-1000&", '5': "100&-100&"}
