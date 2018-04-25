@@ -2,6 +2,7 @@ import evdev
 from evdev import InputDevice, categorize  # import * is evil :)
 from time import sleep
 import serial
+import serial.tools.list_ports
 import RPi.GPIO as GPIO
 import time
 # to use Raspberry Pi board pin numbers
@@ -65,6 +66,7 @@ def fullBattery():
             #Empty slot or battery over 75%
             oncounter= oncounter+1	
         else:
+            print("M")
             oncounter=0
         time.sleep(0.1)
 def readSerial():
@@ -79,7 +81,12 @@ def initall():
             devloc = device.fn
     dev = InputDevice(devloc)
     # Establish the connection on a specific port
-    ser = serial.Serial('//dev/ttyUSB0', 9600)
+    ports= list(serial.tools.list_ports.comports())
+    for p in ports:
+        if(p.product=="USB2.0-Serial"):
+            arduloc=p.device
+            print (arduloc, p.product)
+            ser = serial.Serial(arduloc, 9600)
 if __name__ == "__main__":
     initall()
     fullBattery()
