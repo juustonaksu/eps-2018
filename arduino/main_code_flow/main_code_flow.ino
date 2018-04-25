@@ -179,7 +179,7 @@ void takeFullBattery() {
   digitalWrite(A12, HIGH);
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
-  Serial.write("Gimme coords");
+  Serial.println("Full");
   if (Serial.available()) {
     for (int i = 0; i < 2; i++) {
       String servo = Serial.readStringUntil('&');
