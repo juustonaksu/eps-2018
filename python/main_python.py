@@ -76,7 +76,7 @@ def readSerial():
     req = ser.readline()
     if(req=="Full"):
         fullBattery()
-def initall():
+if __name__ == "__main__":
     devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
     devloc = ""
     for device in devices:
@@ -90,8 +90,6 @@ def initall():
             arduloc=p.device
             print (arduloc, p.product)
             ser = serial.Serial(arduloc, 9600)
-if __name__ == "__main__":
-    initall()
     fullBattery()
 
 
