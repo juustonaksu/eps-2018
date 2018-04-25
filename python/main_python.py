@@ -21,6 +21,7 @@ def mapBattery(batno):
         # Convert the decimal number to ASCII then send it to the Arduino
         ser.write(sendstr.encode())
         #ser.readline()
+        print("Sent!")
 
     except KeyError:
         print("No such key number exists!")
@@ -52,7 +53,7 @@ def readCode():
                     if finstr.isdigit():
                         mapBattery(finstr)
                         readSerial()
-                    print(format(finstr))
+                    print("DEB",format(finstr))
                     finstr = ""
 def fullBattery():
     oncounter = 0
