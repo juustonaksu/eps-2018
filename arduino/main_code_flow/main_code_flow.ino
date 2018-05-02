@@ -17,22 +17,23 @@ NewPing sonar(PING_PIN, PING_PIN, MAX_DISTANCE);
 boolean fullbatteryiswaiting = false;
 long motorTimer = 0;
 // minus= away from motorshaft + towards motorshaft
+// value: between -255 and 255.
 uint8_t motorSpeed = 255;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600); // set the baud rate
-
+  // - left + right
   stepperx.setMaxSpeed(1000);
   stepperx.setAcceleration(2000);
   stepperx.setMicroStep(1);
   stepperx.enableOutputs();
-
+  //- down + up
   stepperz.setMaxSpeed(1000);
   stepperz.setAcceleration(2000);
   stepperz.setMicroStep(1);
   stepperz.enableOutputs();
-
+  // - back + forward
   steppery.setMaxSpeed(1000);
   steppery.setAcceleration(2000);
   steppery.setMicroStep(1);
@@ -67,17 +68,17 @@ void initializeMotors() {
   dcmotorleft.run(-motorSpeed);
   dcmotorright.run(-motorSpeed);
   delay(200);
-  dcmotorleft.run(motorSpeed); /* value: between -255 and 255. */
-  dcmotorright.run(motorSpeed); /* value: between -255 and 255. */
-  delay(10000);
+  dcmotorleft.run(motorSpeed);
+  dcmotorright.run(motorSpeed);
+  delay(15000);
   dcmotorleft.stop();
   dcmotorright.stop();
   delay(100);
   dcmotorleft.stop();
   dcmotorright.stop();
-  stepperx.move(-10000);
-  stepperz.move(-10000);
-  steppery.move(-10000);
+  stepperx.move(-11000);
+  stepperz.move(-11000);
+  steppery.move(-11000);
 
   while (digitalRead(A9) == HIGH) {
     stepperx.run();
@@ -94,13 +95,13 @@ void initializeMotors() {
 }
 
 void changeBattery() {
-    digitalWrite(A11, HIGH);
+  digitalWrite(A11, HIGH);
   digitalWrite(A12, LOW);
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
-  Serial.write("Change");
-  steppery.moveTo(500);
-  while (stepperx.currentPosition() != 500) {
+  //move plate to push the drone
+  steppery.moveTo(0);
+  while (steppery.currentPosition() != 0) {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
@@ -133,8 +134,8 @@ void changeBattery() {
 }
 
 void batteryScan() {
-  stepperz.moveTo(2000);
-  while (stepperz.currentPosition() != 2000) {
+  stepperz.moveTo(8000);
+  while (stepperz.currentPosition() != 8000) {
     stepperz.run();
   }
   if (Serial.available()) {
@@ -148,6 +149,8 @@ void batteryScan() {
       }
     }
     moveMotors(m1, m2);
+    //wait, simulating dropping the battery to the charger
+    delay(1000);
   }
   //go back to loop
   fullbatteryiswaiting = false;
@@ -175,6 +178,11 @@ void moveMotors(int z, int x) {
   }
 }
 void takeFullBattery() {
+  //move plate to back, so drone has space to land
+  steppery.moveTo(10000);
+  while (steppery.currentPosition() != 10000) {
+    steppery.run();
+  }
   digitalWrite(A11, LOW);
   digitalWrite(A12, HIGH);
   digitalWrite(A13, LOW);
@@ -191,7 +199,9 @@ void takeFullBattery() {
       }
     }
     moveMotors(m1, m2);
-    moveMotors(3000, 3000);
+    delay(1000);
+    //move system to waiting position
+    moveMotors(10000, 2000);
     fullbatteryiswaiting = true;
   }
   //move to drone waiting position
