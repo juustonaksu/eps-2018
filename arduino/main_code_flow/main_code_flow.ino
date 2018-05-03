@@ -219,7 +219,4 @@ void loop() {
   digitalWrite(A12, LOW);
   digitalWrite(A13, LOW);
   digitalWrite(A14, HIGH);
-  /*stepperx.run();
-    steppery.run();
-    stepperz.run();*/
 }
