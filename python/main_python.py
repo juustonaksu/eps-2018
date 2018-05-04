@@ -98,8 +98,8 @@ def readSerial():
     req=req.rstrip()
     req=req.decode("utf-8")
     print("Arduino sent: ",req,"\n\n***********************\n")
-    if(req=="Full"):
-        fullBattery()
+    if(req=="F"):
+        fullBattery()       
         
 if __name__ == "__main__":
     devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
@@ -116,6 +116,6 @@ if __name__ == "__main__":
             arduloc=p.device
             print ("Arduino is at ",arduloc, p.product,"\n")
             ser = serial.Serial(arduloc, 9600)
-    fullBattery()
+    readSerial()
 
 
