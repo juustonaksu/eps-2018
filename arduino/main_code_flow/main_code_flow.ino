@@ -76,61 +76,70 @@ void initializeMotors() {
   delay(100);
   dcmotorleft.stop();
   dcmotorright.stop();
-  
+  stepperz.move(-40000);
+  while (digitalRead(A10) == LOW) {
+    delay(1);
+    stepperz.run();
+  }
+  stepperz.setCurrentPosition(0);
+  stepperx.move(-40000);
   while (digitalRead(A9) == LOW) {
-    stepperx.move(-18000);
+    delay(1);
     stepperx.run();
   }
-  
+  stepperx.setCurrentPosition(0);
   while (digitalRead(A8) == LOW) {
     steppery.move(-18000);
     steppery.run();
   }
   steppery.setCurrentPosition(0);
-  stepperx.setCurrentPosition(0);
-  while (digitalRead(A10) == LOW) {
-    stepperz.move(-18000);
-    stepperz.run();
-  }
-  stepperz.setCurrentPosition(0);
 }
 
 void changeBattery() {
-  moveMotors(10000, 2000);
   digitalWrite(A11, HIGH);
   digitalWrite(A12, LOW);
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
   //move plate to push the drone
-  steppery.moveTo(2000);
-  while (steppery.currentPosition() != 2000 || digitalRead(A8) == LOW) {
+  steppery.moveTo(3000);
+  while (steppery.currentPosition() != 3000) {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
   delay(19000);
+  //left stick is out
   dcmotorleft.stop();
-  stepperx.moveTo(2500);
-  while (stepperx.currentPosition() != 2500 || digitalRead(A9) == LOW) {
+  //move the stick to the battery
+  stepperx.moveTo(4500);
+  while (stepperx.currentPosition() != 4500) {
     stepperx.run();
+    delay(1);
   }
+  //pull the battery out
   dcmotorleft.run(motorSpeed);
   delay(19000);
   dcmotorleft.stop();
-  //empty battery is out
+  //empty battery is out, move full battery to place
   stepperx.moveTo(3500);
   while (stepperx.currentPosition() != 3500 ) {
     stepperx.run();
+    delay(1);
   }
+  //full battery is in correct position, extrude it
   dcmotorright.run(-motorSpeed);
   delay(19000);
   dcmotorright.stop();
-  stepperx.moveTo(0);
-  while (stepperx.currentPosition() != 0 || digitalRead(A9) == LOW) {
+  //full battery is inside drone, now you need to move the arm away
+  stepperx.moveTo(1000);
+  while (stepperx.currentPosition() != 1000) {
     stepperx.run();
+    delay(1);
   }
+  //arm is out of the drone, put it back to rest position
   dcmotorright.run(motorSpeed);
   delay(19000);
   dcmotorright.stop();
+
   //full battery is in the drone, system ready to go on
   batteryScan();
 }
@@ -139,8 +148,9 @@ void batteryScan() {
   stepperz.moveTo(8000);
   while (stepperz.currentPosition() != 8000) {
     stepperz.run();
+    delay(1);
   }
-  if (Serial.available()) {
+  while (Serial.available()) {
     for (int i = 0; i < 2; i++) {
       String servo = Serial.readStringUntil('&');
       int int_pos = servo.toInt();
@@ -151,9 +161,10 @@ void batteryScan() {
       }
     }
     moveMotors(m1, m2);
-    //wait, simulating dropping the battery to the charger
-    delay(1000);
+    break;
   }
+  //wait, simulating dropping the battery to the charger
+  delay(5000);
   //go back to loop
   fullbatteryiswaiting = false;
 }
@@ -174,21 +185,25 @@ void moveMotors(int z, int x) {
     digitalWrite(A13, LOW);
     digitalWrite(A14, LOW);
   }
-  while ((stepperz.currentPosition() != z) && (stepperx.currentPosition() != x)) {
+  while (stepperz.currentPosition() != z) {
     stepperz.run();
+    delay(1);
+  }
+  while (stepperx.currentPosition() != x) {
     stepperx.run();
+    delay(1);
   }
 }
 void takeFullBattery() {
   //move plate to back, so drone has space to land
-  steppery.moveTo(17000);
-  while (steppery.currentPosition() != 17000) {
-    steppery.run();
-  }
   digitalWrite(A11, LOW);
   digitalWrite(A12, HIGH);
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
+  steppery.moveTo(17500);
+  while (steppery.currentPosition() != 17500) {
+    steppery.run();
+  }
   Serial.println("F");
   if (Serial.available()) {
     for (int i = 0; i < 2; i++) {
@@ -201,8 +216,9 @@ void takeFullBattery() {
       }
     }
     moveMotors(m1, m2);
-    delay(1000);
+    delay(5000);
     //move system to waiting position
+    moveMotors(18000, 7000);
     fullbatteryiswaiting = true;
   }
   //move to drone waiting position

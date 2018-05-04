@@ -16,8 +16,8 @@ GPIO.setup(18, GPIO.IN)
 
 def mapBattery(batno):
     print("Searching battery number",batno," co-ordinates")
-    dict = {'1': "1000&500&", '2': "2000&500&",
-            '3': "3000&500&", '4': "4000&500&", '5': "5000&500&"}
+    dict = {'1': "500&1000&", '2': "500&2000&",
+            '3': "500&4000&", '4': "500&5000&", '5': "500&7000&"}
     try:
         sendstr = dict[batno]
         # Convert the decimal number to ASCII then send it to the Arduino
