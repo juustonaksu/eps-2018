@@ -128,7 +128,7 @@ void changeBattery() {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
-  delay(19000);
+  delay(10000);
   //left stick is out
   dcmotorleft.stop();
   //move the stick to the battery
@@ -139,17 +139,17 @@ void changeBattery() {
   }
   //pull the battery out
   dcmotorleft.run(motorSpeed);
-  delay(19000);
+  delay(10000);
   dcmotorleft.stop();
   //empty battery is out, move full battery to place
-  stepperx.moveTo(5800);
-  while (stepperx.currentPosition() != 5800 ) {
+  stepperx.moveTo(5900);
+  while (stepperx.currentPosition() != 5900 ) {
     stepperx.run();
     delay(1);
   }
   //full battery is in correct position, extrude it
   dcmotorright.run(-motorSpeed);
-  delay(19000);
+  delay(10000);
   dcmotorright.stop();
   //full battery is inside drone, now you need to move the arm away
   stepperx.moveTo(7000);
@@ -159,7 +159,7 @@ void changeBattery() {
   }
   //arm is out of the drone, put it back to rest position
   dcmotorright.run(motorSpeed);
-  delay(20000);
+  delay(12000);
   dcmotorright.stop();
 
   //full battery is in the drone, system ready to go on
@@ -167,8 +167,8 @@ void changeBattery() {
 }
 
 void batteryScan() {
-  stepperz.moveTo(8000);
-  while (stepperz.currentPosition() != 8000) {
+  stepperz.moveTo(2000);
+  while (stepperz.currentPosition() != 2000) {
     stepperz.run();
     delay(1);
   }
@@ -187,12 +187,19 @@ void batteryScan() {
     break;
   }
   //wait, simulating dropping the battery to the charger
-  dcmotorleft.run(-motorSpeed);
+  dcmotorright.run(-motorSpeed);
   delay(5000);
-  dcmotorleft.stop();
-  dcmotorleft.run(motorSpeed);
+  dcmotorright.stop();
+  int targetpos = stepperx.currentPosition();
+  targetpos= targetpos + 900;
+  stepperx.move(900);
+  while (stepperx.currentPosition() != targetpos ) {
+    stepperx.run();
+    delay(1);
+  }
+  dcmotorright.run(motorSpeed);
   delay(5000);
-  dcmotorleft.stop();
+  dcmotorright.stop();
   //go back to loop
   fullbatteryiswaiting = false;
 }
@@ -250,13 +257,13 @@ void takeFullBattery() {
     moveMotors(m1, m2);
     //wait, simulating dropping the battery to the charger
     dcmotorleft.run(-motorSpeed);
-    delay(5000);
+    delay(10000);
     dcmotorleft.stop();
     dcmotorleft.run(motorSpeed);
-    delay(5000);
+    delay(10000);
     dcmotorleft.stop();
     //move system to waiting position
-    moveMotors(17800, 6000);
+    moveMotors(9000, 6000);
     fullbatteryiswaiting = true;
   }
   //move to drone waiting position
