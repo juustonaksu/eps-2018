@@ -77,22 +77,44 @@ void initializeMotors() {
   dcmotorleft.stop();
   dcmotorright.stop();
   stepperz.move(-40000);
-  while (digitalRead(A10) == LOW) {
+  stepperx.move(-40000);
+  steppery.move(-18000);
+  /*while (digitalRead(A10) == LOW) {
     delay(1);
     stepperz.run();
-  }
-  stepperz.setCurrentPosition(0);
-  stepperx.move(-40000);
-  while (digitalRead(A9) == LOW) {
+    }
+    stepperz.setCurrentPosition(0);
+    stepperx.move(-40000);
+    while (digitalRead(A9) == LOW) {
     delay(1);
     stepperx.run();
-  }
-  stepperx.setCurrentPosition(0);
-  while (digitalRead(A8) == LOW) {
+    }
+    stepperx.setCurrentPosition(0);
+    while (digitalRead(A8) == LOW) {
     steppery.move(-18000);
     steppery.run();
+    }
+    steppery.setCurrentPosition(0);*/
+  while (true) {
+    int Z = digitalRead(A10);
+    int X = digitalRead(A9);
+    int Y = digitalRead(A8);
+    if ((Z == HIGH) && (X == HIGH) && (Y == HIGH)) {
+      break;
+    }
+    if (X == LOW) {
+      stepperx.run();
+    }
+    if (Z == LOW) {
+      stepperz.run();
+    }
+    if (Y == LOW) {
+      steppery.run();
+    }
   }
+  stepperx.setCurrentPosition(0);
   steppery.setCurrentPosition(0);
+  stepperz.setCurrentPosition(0);
 }
 
 void changeBattery() {
@@ -101,8 +123,8 @@ void changeBattery() {
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
   //move plate to push the drone
-  steppery.moveTo(3000);
-  while (steppery.currentPosition() != 3000) {
+  steppery.moveTo(2500);
+  while (steppery.currentPosition() != 2500) {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
@@ -120,8 +142,8 @@ void changeBattery() {
   delay(19000);
   dcmotorleft.stop();
   //empty battery is out, move full battery to place
-  stepperx.moveTo(3500);
-  while (stepperx.currentPosition() != 3500 ) {
+  stepperx.moveTo(5800);
+  while (stepperx.currentPosition() != 5800 ) {
     stepperx.run();
     delay(1);
   }
@@ -130,14 +152,14 @@ void changeBattery() {
   delay(19000);
   dcmotorright.stop();
   //full battery is inside drone, now you need to move the arm away
-  stepperx.moveTo(1000);
-  while (stepperx.currentPosition() != 1000) {
+  stepperx.moveTo(7000);
+  while (stepperx.currentPosition() != 7000) {
     stepperx.run();
     delay(1);
   }
   //arm is out of the drone, put it back to rest position
   dcmotorright.run(motorSpeed);
-  delay(19000);
+  delay(20000);
   dcmotorright.stop();
 
   //full battery is in the drone, system ready to go on
@@ -150,6 +172,7 @@ void batteryScan() {
     stepperz.run();
     delay(1);
   }
+  delay(1000);
   while (Serial.available()) {
     for (int i = 0; i < 2; i++) {
       String servo = Serial.readStringUntil('&');
@@ -164,7 +187,12 @@ void batteryScan() {
     break;
   }
   //wait, simulating dropping the battery to the charger
+  dcmotorleft.run(-motorSpeed);
   delay(5000);
+  dcmotorleft.stop();
+  dcmotorleft.run(motorSpeed);
+  delay(5000);
+  dcmotorleft.stop();
   //go back to loop
   fullbatteryiswaiting = false;
 }
@@ -185,13 +213,17 @@ void moveMotors(int z, int x) {
     digitalWrite(A13, LOW);
     digitalWrite(A14, LOW);
   }
-  while (stepperz.currentPosition() != z) {
-    stepperz.run();
-    delay(1);
-  }
-  while (stepperx.currentPosition() != x) {
-    stepperx.run();
-    delay(1);
+  while (true) {
+    if ((stepperx.currentPosition() == x) && (stepperz.currentPosition() == z)) {
+      break;
+    } else {
+      if (stepperx.currentPosition() != x) {
+        stepperx.run();
+      }
+      if (stepperz.currentPosition() != z) {
+        stepperz.run();
+      }
+    }
   }
 }
 void takeFullBattery() {
@@ -216,9 +248,15 @@ void takeFullBattery() {
       }
     }
     moveMotors(m1, m2);
+    //wait, simulating dropping the battery to the charger
+    dcmotorleft.run(-motorSpeed);
     delay(5000);
+    dcmotorleft.stop();
+    dcmotorleft.run(motorSpeed);
+    delay(5000);
+    dcmotorleft.stop();
     //move system to waiting position
-    moveMotors(18000, 7000);
+    moveMotors(17800, 6000);
     fullbatteryiswaiting = true;
   }
   //move to drone waiting position
