@@ -70,31 +70,12 @@ void initializeMotors() {
   delay(500);
   dcmotorleft.run(motorSpeed);
   dcmotorright.run(motorSpeed);
-  delay(5000);
-  dcmotorleft.stop();
-  dcmotorright.stop();
-  delay(100);
+  delay(7000);
   dcmotorleft.stop();
   dcmotorright.stop();
   stepperz.move(-40000);
   stepperx.move(-40000);
   steppery.move(-18000);
-  /*while (digitalRead(A10) == LOW) {
-    delay(1);
-    stepperz.run();
-    }
-    stepperz.setCurrentPosition(0);
-    stepperx.move(-40000);
-    while (digitalRead(A9) == LOW) {
-    delay(1);
-    stepperx.run();
-    }
-    stepperx.setCurrentPosition(0);
-    while (digitalRead(A8) == LOW) {
-    steppery.move(-18000);
-    steppery.run();
-    }
-    steppery.setCurrentPosition(0);*/
   while (true) {
     int Z = digitalRead(A10);
     int X = digitalRead(A9);
@@ -123,8 +104,8 @@ void changeBattery() {
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
   //move plate to push the drone
-  steppery.moveTo(2500);
-  while (steppery.currentPosition() != 2500) {
+  steppery.moveTo(3500);
+  while (steppery.currentPosition() != 3500) {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
@@ -172,7 +153,7 @@ void batteryScan() {
     stepperz.run();
     delay(1);
   }
-  delay(1000);
+  delay(2000);
   if (Serial.available()) {
     for (int i = 0; i < 2; i++) {
       String servo = Serial.readStringUntil('&');
@@ -259,7 +240,7 @@ void takeFullBattery() {
     moveMotors(m1, m2);
     //wait, simulating dropping the battery to the charger
     dcmotorright.run(-motorSpeed);
-    delay(19500);
+    delay(20200);
     dcmotorright.stop();
     //delay for debugging!
     int targetpos = stepperx.currentPosition();
@@ -269,9 +250,9 @@ void takeFullBattery() {
       stepperx.run();
       delay(1);
     }
-    delay(5000);
+    delay(500);
     dcmotorright.run(motorSpeed);
-    delay(19900);
+    delay(20800);
     dcmotorright.stop();
     //move system to waiting position
     moveMotors(12150, 6000);
