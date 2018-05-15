@@ -69,7 +69,7 @@ void initializeMotors() {
   delay(500);
   dcmotorleft.run(motorSpeed);
   dcmotorright.run(motorSpeed);
-  delay(10000);
+  delay(19500);
   dcmotorleft.stop();
   dcmotorright.stop();
   stepperz.move(-45000);
@@ -96,7 +96,61 @@ void initializeMotors() {
   steppery.setCurrentPosition(0);
   stepperz.setCurrentPosition(0);
 }
-
+void takeFullBattery() {
+  //move plate to back, so drone has space to land
+  digitalWrite(A11, LOW);
+  digitalWrite(A12, HIGH);
+  digitalWrite(A13, LOW);
+  digitalWrite(A14, LOW);
+  unsigned long millisbefore = 0;
+  millisbefore = millis();
+  steppery.moveTo(17500);
+  stepperz.moveTo(1690);
+  while (steppery.currentPosition() != 17500) {
+    steppery.run();
+    stepperz.run();
+    if ((millis() - millisbefore) <= 15000) {
+      dcmotorright.run(-motorSpeed);
+      dcmotorleft.run(-motorSpeed);
+    } else {
+      dcmotorright.stop();
+      dcmotorleft.stop();
+    }
+  }
+  Serial.println("F");
+  if (Serial.available()) {
+    for (int i = 0; i < 2; i++) {
+      String servo = Serial.readStringUntil('&');
+      int int_pos = servo.toInt();
+      if (i == 0) {
+        m1 = int_pos;
+      } else if (i == 1) {
+        m2 = int_pos;
+      }
+    }
+    moveMotors(m1, m2);
+    //wait, simulating dropping the battery to the charger
+    dcmotorright.run(-motorSpeed);
+    delay(5680);
+    dcmotorright.stop();
+    //delay for debugging!
+    int targetpos = stepperx.currentPosition();
+    targetpos = targetpos + 1000;
+    stepperx.move(1000);
+    while (stepperx.currentPosition() != targetpos ) {
+      stepperx.run();
+      delay(1);
+    }
+    delay(500);
+    dcmotorright.run(motorSpeed);
+    delay(21500);
+    dcmotorright.stop();
+    //move system to waiting position
+    moveMotors(12800, 6000);
+    fullbatteryiswaiting = true;
+  }
+  //move to drone waiting position
+}
 void changeBattery() {
   digitalWrite(A11, HIGH);
   digitalWrite(A12, LOW);
@@ -108,7 +162,7 @@ void changeBattery() {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
-  delay(4800);
+  delay(4200);
   //left stick is out
   dcmotorleft.stop();
   //move the stick to the battery
@@ -122,14 +176,14 @@ void changeBattery() {
   delay(22000);
   dcmotorleft.stop();
   //empty battery is out, move full battery to place
-  stepperx.moveTo(7000);
-  while (stepperx.currentPosition() != 7000 ) {
+  stepperx.moveTo(7100);
+  while (stepperx.currentPosition() != 7100 ) {
     stepperx.run();
     delay(1);
   }
   //full battery is in correct position, extrude it
   dcmotorright.run(-motorSpeed);
-  delay(20000);
+  delay(21000);
   dcmotorright.stop();
   //full battery is inside drone, now you need to move the arm away
   stepperx.moveTo(9000);
@@ -169,12 +223,18 @@ void batteryScan() {
   }
   //wait, simulating dropping the battery to the charger
   dcmotorleft.run(-motorSpeed);
-  delay(19300);
+  delay(19700);
   dcmotorleft.stop();
-  //now take the offset away
+  //now take the offset away, except if it will be negative(battery n:o 1)
   int targetpos = stepperx.currentPosition();
-  targetpos = targetpos - 1600;
-  stepperx.move(-1600);
+  if ((targetpos - 1600) < 0) {
+    targetpos=targetpos+1000;
+    stepperx.move(1000);
+  } else {
+    targetpos = targetpos - 1600;
+    stepperx.move(-1600);
+  }
+
   while (stepperx.currentPosition() != targetpos ) {
     stepperx.run();
     delay(1);
@@ -215,61 +275,7 @@ void moveMotors(int z, int x) {
     }
   }
 }
-void takeFullBattery() {
-  //move plate to back, so drone has space to land
-  digitalWrite(A11, LOW);
-  digitalWrite(A12, HIGH);
-  digitalWrite(A13, LOW);
-  digitalWrite(A14, LOW);
-  long motortimer = 15000;
-  unsigned long millisbefore = millis();
-  steppery.moveTo(17500);
-  stepperz.moveTo(1600);
-  while (steppery.currentPosition() != 17500) {
-    steppery.run();
-    stepperz.run();
-    if (millis() - millisbefore < motortimer) {
-      dcmotorright.run(-motorSpeed);
-      dcmotorleft.run(-motorSpeed);
-    } else {
-      dcmotorright.stop();
-      dcmotorleft.stop();
-    }
-  }
-  Serial.println("F");
-  if (Serial.available()) {
-    for (int i = 0; i < 2; i++) {
-      String servo = Serial.readStringUntil('&');
-      int int_pos = servo.toInt();
-      if (i == 0) {
-        m1 = int_pos;
-      } else if (i == 1) {
-        m2 = int_pos;
-      }
-    }
-    moveMotors(m1, m2);
-    //wait, simulating dropping the battery to the charger
-    dcmotorright.run(-motorSpeed);
-    delay(5860);
-    dcmotorright.stop();
-    //delay for debugging!
-    int targetpos = stepperx.currentPosition();
-    targetpos = targetpos + 1000;
-    stepperx.move(1000);
-    while (stepperx.currentPosition() != targetpos ) {
-      stepperx.run();
-      delay(1);
-    }
-    delay(500);
-    dcmotorright.run(motorSpeed);
-    delay(21500);
-    dcmotorright.stop();
-    //move system to waiting position
-    moveMotors(12200, 6000);
-    fullbatteryiswaiting = true;
-  }
-  //move to drone waiting position
-}
+
 
 void loop() {
   // put your main code here, to run repeatedly:
