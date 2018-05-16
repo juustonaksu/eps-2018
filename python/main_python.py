@@ -14,7 +14,7 @@ GPIO.setup(18, GPIO.IN)
 
 def mapBattery(batno):
     print("Searching battery number",batno," co-ordinates")
-    dict = {'1': "1690&1970&", '2': "1690&4190&",
+    dict = {'1': "1550&1970&", '2': "1550&4160&",
             '3': "920&6200&", '4': "800&5000&", '5': "800&7000&"}
     try:
         sendstr = dict[batno]
