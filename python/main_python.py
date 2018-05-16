@@ -57,8 +57,8 @@ def readCode():
                     finstr = ""
 def fullBattery():
     while True:
-        batt1= checkBattery(13,"1")
-        batt2 =checkBattery(18,"2")
+        batt2= checkBattery(13,"2")
+        batt1 =checkBattery(18,"1")
         if(batt1 == True):
             mapBattery("1")
             readCode()
