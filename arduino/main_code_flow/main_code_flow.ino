@@ -118,17 +118,17 @@ void takeFullBattery() {
   digitalWrite(A12, HIGH);
   digitalWrite(A13, LOW);
   digitalWrite(A14, LOW);
-  //Variable for counting time for DC motors without delay, see https://www.arduino.cc/en/Tutorial/BlinkWithoutDelay 
-  unsigned long millisbefore = 0;
-  millisbefore = millis();
   //Move plate to back, so drone has space to land
   steppery.moveTo(17500);
   //Move Z motor to correct position to reduce operating time
-  stepperz.moveTo(1500);
+  stepperz.moveTo(950);
+  //Variable for counting time for DC motors without delay, see https://www.arduino.cc/en/Tutorial/BlinkWithoutDelay 
+  unsigned long millisbefore = 0;
+  millisbefore = millis();
   while (steppery.currentPosition() != 17500) {
     steppery.run();
     stepperz.run();
-    if ((millis() - millisbefore) <= 15000) {
+    if ((millis() - millisbefore) <= 16000) {
       dcmotorright.run(-motorSpeed);
       dcmotorleft.run(-motorSpeed);
     } else {
@@ -152,7 +152,7 @@ void takeFullBattery() {
     moveMotors(m1, m2);
     //take the full battery
     dcmotorright.run(-motorSpeed);
-    delay(5180);
+    delay(5900);
     dcmotorright.stop();
     //delay for checking the correct position of the arm
     delay(2000);
@@ -165,10 +165,10 @@ void takeFullBattery() {
     }
     delay(500);
     dcmotorright.run(motorSpeed);
-    delay(21500);
+    delay(22500);
     dcmotorright.stop();
     //move battery plate to drone waiting position
-    moveMotors(12850, 6000);
+    moveMotors(12000, 6000);
     fullbatteryiswaiting = true;
   }
 }
@@ -185,7 +185,7 @@ void changeBattery() {
     steppery.run();
   }
   dcmotorleft.run(-motorSpeed);
-  delay(4200);
+  delay(9000);
   //now left stick is out
   dcmotorleft.stop();
   //move left stick to the empty battery (in drone)
@@ -208,7 +208,7 @@ void changeBattery() {
   }
   //full battery is in correct position, extrude it
   dcmotorright.run(-motorSpeed);
-  delay(19800);
+  delay(21600);
   dcmotorright.stop();
   //full battery is inside drone, now you need to move the arm away
   stepperx.moveTo(9000);
@@ -218,7 +218,7 @@ void changeBattery() {
   }
   //arm is out of the drone, put it back to rest position
   dcmotorright.run(motorSpeed);
-  delay(20500);
+  delay(21800);
   dcmotorright.stop();
   //full battery is in the drone, system ready to go on
   batteryScan();
@@ -250,7 +250,7 @@ void batteryScan() {
   }
   //Placing the battery to the charger
   dcmotorleft.run(-motorSpeed);
-  delay(19700);
+  delay(19800);
   dcmotorleft.stop();
   //now take the offset away, except if the stepper motor position would be negative(which would be the case with battery #1)
   int targetpos = stepperx.currentPosition();
@@ -279,7 +279,7 @@ void moveMotors(int z, int x) {
   float mv = (val / 1024.00) * 5000;
   float cel = mv / 10;
   //determine if the system is too hot to operate (in Celsius)
-  if (cel < 30) {
+  if (cel < 35) {
     stepperz.moveTo(z);
     stepperx.moveTo(x);
     digitalWrite(A11, LOW);
